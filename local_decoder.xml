@@ -1,0 +1,45 @@
+<decoder name="cryptovault">
+  <program_name>CryptoVault_Frontend</program_name>
+</decoder>
+
+<decoder name="cryptovault_fields">
+  <parent>cryptovault</parent>
+  <regex>"app_name":\s*"([^"]+)"</regex>
+  <order>app_name</order>
+</decoder>
+
+<decoder name="cryptovault_fields">
+  <parent>cryptovault</parent>
+  <regex>"log_source":\s*"([^"]+)"</regex>
+  <order>log_source</order>
+</decoder>
+
+<decoder name="cryptovault_fields">
+  <parent>cryptovault</parent>
+  <regex>"event_type":\s*"([^"]+)"</regex>
+  <order>event_type</order>
+</decoder>
+
+<decoder name="cryptovault_fields">
+  <parent>cryptovault</parent>
+  <regex>"severity":\s*"([^"]+)"</regex>
+  <order>severity</order>
+</decoder>
+
+<decoder name="cryptovault_fields">
+  <parent>cryptovault</parent>
+  <regex>"username":\s*"([^"]+)"</regex>
+  <order>username</order>
+</decoder>
+
+<decoder name="cryptovault_fields">
+  <parent>cryptovault</parent>
+  <regex>"source_ip":\s*"([^"]+)"</regex>
+  <order>source_ip</order>
+</decoder>
+
+<decoder name="cryptovault_fields">
+  <parent>cryptovault</parent>
+  <regex>"details":\s*"([^"]+)"</regex>
+  <order>details</order>
+</decoder>

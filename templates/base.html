@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoVault | Secure Digital Assets</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {% if session.get('logged_in') or show_nav %}
+    <nav class="navbar">
+        <a href="{{ url_for('dashboard') }}" class="logo">CryptoVault</a>
+        <div class="nav-links">
+            <a href="{{ url_for('dashboard') }}" class="{% if request.path == '/dashboard' %}active{% endif %}">Vault</a>
+            <a href="{{ url_for('simulator') }}" class="{% if request.path == '/simulator' %}active{% endif %}">Simulator</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Disconnect</a>
+        </div>
+    </nav>
+    {% endif %}
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

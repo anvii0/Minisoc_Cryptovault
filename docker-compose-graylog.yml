@@ -1,0 +1,62 @@
+version: "3.8"
+
+services:
+  # ── MongoDB ──────────────────────────────────────────────────────────────────
+  mongodb:
+    image: mongo:6
+    container_name: graylog_mongodb
+    restart: unless-stopped
+    volumes:
+      - graylog_mongodb_data:/data/db
+
+  # ── OpenSearch (drop-in ES replacement, works with Graylog 5) ─────────────
+  opensearch:
+    image: opensearchproject/opensearch:2.12.0
+    container_name: graylog_opensearch
+    restart: unless-stopped
+    environment:
+      - cluster.name=graylog
+      - node.name=opensearch
+      - discovery.type=single-node
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
+      - DISABLE_SECURITY_PLUGIN=true   # no TLS/auth for local dev
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - graylog_os_data:/usr/share/opensearch/data
+
+  # ── Graylog ───────────────────────────────────────────────────────────────
+  graylog:
+    image: graylog/graylog:5.2
+    container_name: graylog
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+      - opensearch
+    environment:
+      # Change this to a random 64-char hex string in production
+      - GRAYLOG_PASSWORD_SECRET=somesuperrandompasswordsecret1234567890abcdefghijklmnopqrst
+      # SHA2 hash of "admin" — keep as-is or generate your own:
+      #   echo -n "yourpassword" | shasum -a 256
+      - GRAYLOG_ROOT_PASSWORD_SHA2=8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
+      - GRAYLOG_HTTP_EXTERNAL_URI=http://127.0.0.1:9000/
+      - GRAYLOG_ELASTICSEARCH_HOSTS=http://opensearch:9200
+      - GRAYLOG_MONGODB_URI=mongodb://mongodb:27017/graylog
+    ports:
+      - "9000:9000"       # Graylog web UI
+      - "12201:12201/udp" # GELF UDP  ← your app sends here
+      - "12201:12201/tcp" # GELF TCP  (bonus)
+      - "5140:5140/udp"   # Syslog UDP (optional)
+    volumes:
+      - graylog_data:/usr/share/graylog/data
+
+volumes:
+  graylog_mongodb_data:
+  graylog_os_data:
+  graylog_data:

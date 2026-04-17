@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="glass-card">
+    <div class="logo" style="text-align: center; margin-bottom: 2rem;">CryptoVault</div>
+    <h2>Secure Login</h2>
+    
+    {% if error %}
+        <p class="error-msg">{{ error }}</p>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('login') }}">
+        <div class="input-group">
+            <label>Username</label>
+            <input type="text" name="username" placeholder="Enter username" required>
+        </div>
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" name="password" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn">Unlock Vault</button>
+    </form>
+    <p style="margin-top: 1.5rem; font-size: 0.75rem; color: #475569; text-align: center;">
+        Protected by Kaveri/Anvita SOC team
+    </p>
+</div>
+{% endblock %}

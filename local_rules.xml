@@ -1,0 +1,56 @@
+<group name="cryptovault,soc_project,">
+
+  <!-- Base rule to match any CryptoVault log -->
+  <rule id="100100" level="3">
+    <decoded_as>cryptovault</decoded_as>
+    <description>CryptoVault: $(log_source) event detected - $(event_type)</description>
+  </rule>
+
+  <!-- Rule 1: Impossible Travel (Admin Account) -->
+  <rule id="100101" level="10">
+    <if_sid>100100</if_sid>
+    <field name="log_source">Active Directory</field>
+    <field name="event_type">SUCCESSFUL_LOGIN</field>
+    <match>distinct geolocation</match>
+    <description>SIEM ALERT (Phase 2 Rule 1): Impossible Travel detected for user $(username) from $(source_ip)</description>
+    <mitre>
+      <id>T1078</id>
+    </mitre>
+  </rule>
+
+  <!-- Rule 2 Base: Vault Beaconing Event -->
+  <rule id="100102" level="3">
+    <if_sid>100100</if_sid>
+    <field name="log_source">Palo Alto</field>
+    <field name="event_type">DNS_QUERY</field>
+    <description>DNS Query from Vault to $(source_ip)</description>
+  </rule>
+
+  <!-- Rule 2 Alert: Multiple Beaconing in 60s -->
+  <rule id="100105" level="8" frequency="10" timeframe="60">
+    <if_matched_sid>100102</if_matched_sid>
+    <description>SIEM ALERT (Phase 2 Rule 2): Vault Beaconing detected! Multiple DNS queries to non-whitelisted IP from $(source_ip)</description>
+    <same_source_ip />
+    <mitre>
+      <id>T1071.004</id>
+    </mitre>
+  </rule>
+
+  <!-- Rule 3: Clipboard Malware EDR -->
+  <rule id="100103" level="12">
+    <if_sid>100100</if_sid>
+    <field name="log_source">CrowdStrike EDR</field>
+    <description>SIEM ALERT (Phase 2 Rule 3): Endpoint Malware Behavior! $(event_type) detected on $(source_ip)</description>
+    <mitre>
+      <id>T1115</id>
+    </mitre>
+  </rule>
+
+  <!-- High volume withdrawal -->
+  <rule id="100104" level="12">
+    <if_sid>100100</if_sid>
+    <field name="event_type">WITHDRAWAL_INITIATED</field>
+    <description>SIEM ALERT: Critical Asset Transfer Initiated by $(username) from $(source_ip)</description>
+  </rule>
+
+</group>

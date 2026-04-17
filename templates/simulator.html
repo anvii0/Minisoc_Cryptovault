@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="glass-card large">
+    <h2 style="margin-bottom: 0.5rem;">SOC Simulations</h2>
+    <p>Trigger attack scenarios to generate logs directly to the SIEM via backend integration.</p>
+
+    <h3 class="section-title">Phase 2: Individual Rules</h3>
+    <div class="sim-grid">
+        <div class="sim-item">
+            <h3>Rule 1: Impossible Travel</h3>
+            <p>Simulate logins from distinct geolocations within a short time frame.</p>
+            <form action="{{ url_for('simulate_impossible_travel') }}" method="POST">
+                <button type="submit" class="btn btn-warning btn-sm">Trigger Alert</button>
+            </form>
+        </div>
+        
+        <div class="sim-item">
+            <h3>Rule 2: Vault Beaconing</h3>
+            <p>Generate repetitive DNS queries to a non-whitelisted IP address.</p>
+            <form action="{{ url_for('simulate_beaconing') }}" method="POST">
+                <button type="submit" class="btn btn-warning btn-sm">Trigger Alert</button>
+            </form>
+        </div>
+        
+        <div class="sim-item">
+            <h3>Rule 3: Clipboard Malware</h3>
+            <p>Simulate an unsigned process modifying clipboard and initiating outbound request.</p>
+            <form action="{{ url_for('simulate_clipboard') }}" method="POST">
+                <button type="submit" class="btn btn-warning btn-sm">Trigger Alert</button>
+            </form>
+        </div>
+    </div>
+
+    <h3 class="section-title" style="border-bottom-color: rgba(239, 68, 68, 0.3);">Phase 4: Advanced Scenarios</h3>
+    <div class="sim-grid">
+        <div class="sim-item danger-theme" style="border-color: rgba(239, 68, 68, 0.3);">
+            <h3>Ransomware Attack</h3>
+            <p>Initiate full kill-chain: MITRE T1059 (Execution) &rarr; T1021 (Lateral) &rarr; T1048 (Exfil) &rarr; T1486 (Impact).</p>
+            <form id="ransomwareForm" action="{{ url_for('simulate_ransomware') }}" method="POST">
+                <button type="button" onclick="startRansomwareSim()" class="btn btn-danger btn-sm">Execute Kill-Chain</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="loading-overlay" id="simOverlay">
+    <div class="spinner"></div>
+    <div class="terminal-text" id="simText">Initializing Phase 4 Parameters...</div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function startRansomwareSim() {
+    const overlay = document.getElementById('simOverlay');
+    const simText = document.getElementById('simText');
+    overlay.classList.add('active');
+    
+    // UI dramatic effect
+    const messages = [
+        "Connecting to jump-server-01...",
+        "Executing powershell payload (MITRE T1059)...",
+        "Pivoting to hot-wallet-server (MITRE T1021)...",
+        "Exfiltrating data via DNS (MITRE T1048)...",
+        "Encrypting wallet_keys.dat (MITRE T1486)...",
+        "Forwarding telemetry to Wazuh/Graylog..."
+    ];
+    
+    let i = 0;
+    const interval = setInterval(() => {
+        if(i < messages.length) {
+            simText.innerText = messages[i];
+            i++;
+        }
+    }, 1200);
+
+    // Submit form after simulation time
+    setTimeout(() => {
+        clearInterval(interval);
+        document.getElementById('ransomwareForm').submit();
+    }, 7500); // the backend actually sleeps 1.5s x 5 stages inside, but we can call fetch asynchronously.
+    
+    // Actually, doing form submit will cause browser to wait. 
+    // To make it modern, let's use fetch instead of simple form submit.
+}
+
+// Override the above startRansomwareSim
+function startRansomwareSim() {
+    const overlay = document.getElementById('simOverlay');
+    const simText = document.getElementById('simText');
+    overlay.classList.add('active');
+    simText.innerText = "Executing Phase 4 Kill-Chain...";
+    
+    fetch("{{ url_for('simulate_ransomware') }}", {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'}
+    }).then(res => res.json())
+      .then(data => {
+          simText.innerText = "Simulation Complete. Check Graylog SIEM.";
+          setTimeout(() => {
+              overlay.classList.remove('active');
+              alert(data.message);
+          }, 1500);
+      }).catch(err => {
+          simText.innerText = "Error executing simulation.";
+          setTimeout(() => overlay.classList.remove('active'), 1500);
+      });
+}
+</script>
+{% endblock %}
